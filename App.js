@@ -1,7 +1,14 @@
-import React from "react";
-import { View, Text, Button, StyleSheet, Platform, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, Button, StyleSheet, Alert } from "react-native";
+import { Accelerometer } from "expo-sensors";
 
 const App = () => {
+  const [accelerometerData, setAccelerometerData] = useState({
+    x: 0,
+    y: 0,
+    z: 0,
+  });
+
   const openPlatformSpecificComponent = () => {
     if (Platform.OS === "android") {
       openAndroidModal();
@@ -44,6 +51,16 @@ const App = () => {
     );
   };
 
+  useEffect(() => {
+    const subscription = Accelerometer.addListener((accelerometerData) => {
+      setAccelerometerData(accelerometerData);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
   return (
     <View style={styles.container}>
       <View style={[styles.section, { flex: 20, backgroundColor: "pink" }]}>
@@ -51,7 +68,12 @@ const App = () => {
       </View>
 
       <View style={[styles.section, { flex: 60, backgroundColor: "white" }]}>
-        <Text style={styles.text}>This is common text for both platforms.</Text>
+        <Text style={styles.text}>
+          Accelerometer Data:{"\n"}
+          X: {accelerometerData.x.toFixed(2)}{"\n"}
+          Y: {accelerometerData.y.toFixed(2)}{"\n"}
+          Z: {accelerometerData.z.toFixed(2)}
+        </Text>
         <Button
           title="Open Platform Component"
           onPress={openPlatformSpecificComponent}
